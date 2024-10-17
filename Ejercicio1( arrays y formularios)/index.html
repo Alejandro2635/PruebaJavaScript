@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="text" id="texto">
+    <input type="button" value="Mostrar números separadoss" onclick="getNumbers(document.getElementById('texto').value)">
+    <p id="errors"></p>
+    <br>
+    <input type="text" id="buscar">
+    <input type="button" value="Mostrar números separadoss" onclick="searchNumber(document.getElementById('buscar').value)">
+    <p id="errors2"></p>
+    <script>
+
+        var numbers = new Array();
+
+        var getNumbers = (text) => {
+            var newNumbers = text.split(',').map(Number);
+            var error = false;
+
+            newNumbers.forEach(number =>{
+                if(Number.isNaN(number)){
+                    error = true;
+                }
+            });
+            
+            if(error){
+                document.getElementById("errors").innerHTML = "Los numero tienen que estar separados por comas corrrectamente";
+            }else{
+                numbers = newNumbers;
+                document.getElementById("errors").innerHTML = "Numeros añadidos";
+            }
+        }
+
+        var searchNumber = (text) =>{
+            var number = text.split('').map(Number);
+
+            if(number.length > 1){
+                document.getElementById("errors2").innerHTML = "Tiene que ser solo un numero";
+            }else if(Number.isNaN(number[0])){
+                document.getElementById("errors2").innerHTML = "No es un numero";
+            }else if(number[0] == null){
+                document.getElementById("errors2").innerHTML = "Inserta un numero";
+            }else{
+                let repeat = 0;
+                numbers.forEach(numberArray =>{
+                    if(numberArray == number[0]){
+                        repeat++;
+                    }
+                });
+                document.getElementById("errors2").innerText = `El numero "${number}" está repetido: ${repeat} veces`;
+            }
+        }
+    </script>
+</body>
+</html>
