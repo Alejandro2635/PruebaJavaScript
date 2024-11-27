@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #principal{
+            width: 500px;
+            height: 500px;
+            margin: auto;
+            border: 1px solid black;
+            display: grid;
+            grid-template-columns: 33.3% 33.3% 33.3%;
+            grid-template-rows: 33.3% 33.3% 33.3%;
+        }
+        #principal div{
+            width: 100%;
+            height: 100%;
+            border: 1px solid black;
+        }
+        #principal div img{
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="points">POINTS: </h1>
+    <h1 id="time">TIME: </h1>
+    <div id="principal">
+        <script>
+            for(let i = 0; i<9; i++){
+                document.getElementById('principal').innerHTML += `<div id='${i}' onclick='hit(${i})'></div>`
+            }
+        </script>
+    </div> 
+    <script>
+        var currentBox;
+        var points = 0;
+        var time = 10;
+
+        var interval1 = setInterval(newMole,2000);
+
+        var interval2 = setInterval(timer,1000);
+
+        function timer(){
+            time--;
+            document.getElementById('time').innerHTML = `TIME: ${time}`;
+            if(time == 0){
+                clearInterval(interval1);
+                clearInterval(interval2);
+                document.getElementById('time').innerHTML = `TIME: FIN DEL JUEGO`;
+            }
+        }
+
+        function hit( box ){
+            if(box === currentBox){
+               points++;
+               document.getElementById('points').innerHTML = `POINTS: ${points}`;
+               newMole();
+            }
+        }
+
+        function newMole(){
+            let newBox = Math.floor(Math.random() * 9);
+            if(currentBox == null){
+                document.getElementById(newBox).innerHTML = '<img src="https://st2.depositphotos.com/43644086/46708/v/450/depositphotos_467082140-stock-illustration-cute-mole-animal-cartoon-vector.jpg"/>';
+                currentBox = newBox;
+            }else{
+                document.getElementById(currentBox).innerHTML = '';
+                document.getElementById(newBox).innerHTML = '<img src="https://st2.depositphotos.com/43644086/46708/v/450/depositphotos_467082140-stock-illustration-cute-mole-animal-cartoon-vector.jpg"/>';
+                currentBox = newBox;
+            }
+            console.log(currentBox);
+        }
+    </script>   
+</body>
+</html>

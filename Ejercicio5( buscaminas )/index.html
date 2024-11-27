@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #tablero {
+            width: 600px;
+            height: 600px;
+            background-color: antiquewhite;
+            margin: 100px auto;
+            display: grid;
+        }
+
+        .casilla {
+            width: 100%;
+            height: 100%;
+            border: 1px solid black;
+            position: relative;
+        }
+
+        .casilla p {
+            width: 100%;
+            position: absolute;
+            top: 23%;
+            text-align: center;
+            font-size: 30px;
+        }
+        .rojo{
+            color: red;
+        }
+        .verde{
+            color:green;
+        }
+        .azul{
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <div id="tablero">
+    </div>
+    <script>
+        const tablero = document.getElementById('tablero');
+        var x = 10;
+        var y = 10;
+        var minas = 10;
+        var casillas = [];
+
+        class casilla {
+            constructor(mina, coordenadaX, coordenadaY) {
+                this.mina = mina;
+                this.coordenadaX = coordenadaX;
+                this.coordenadaY = coordenadaY;
+                this.abierta;
+            }
+        }
+
+        function generarTablero(x, y) {
+            let html = "";
+            for (let i = 0; i < x; i++) {
+                casillas[i] = [];
+                for (let j = 0; j < y; j++) {
+                    html += `<div class="casilla" id="${i}${j}" onclick="abrirCasilla(${i},${j})" onmouseover="over(${i},${j})" onmouseleave="left()"></div>`;
+                    casillas[i][j] = new casilla(false, i, j);
+                }
+            }
+
+            let tamañoColumna = tablero.getBoundingClientRect().width / x;
+            let tamañoFila = tablero.getBoundingClientRect().height / y;
+
+            tablero.style.gridTemplateColumns = `repeat(${x},${tamañoColumna}px)`;
+            tablero.style.gridTemplateRows = `repeat(${y},${tamañoFila}px)`;
+
+            tablero.innerHTML = html;
+        }
+
+        var currentCoordenadaX = "null";
+        var currentCoordenadaY = "null";
+        function over(coordenadaX, coordenadaY){
+            console.log(coordenadaX, coordenadaY)
+            currentCoordenadaX = coordenadaX;
+            currentCoordenadaY = coordenadaY;
+        }
+
+        function left(){
+            currentCoordenadaX = "null";
+            currentCoordenadaY = "null";
+        }
+
+        function marcar(){
+            const element = document.getElementById(`${currentCoordenadaX}${currentCoordenadaY}`);
+            if(currentCoordenadaX != "null" && currentCoordenadaY != "null"){
+                if(element.innerHTML == '<p>X</p>'){
+                    element.innerHTML = '';
+                }else{
+                    element.innerHTML = '<p>X</p>';
+                }
+                
+            }
+        }
+
+        document.addEventListener('keydown',marcar);
+        function añadirMinas(minas, casillas) {
+            for (let i = 0; i < minas; i++) {
+                let coordenadaX = Math.floor(Math.random() * x);
+                let coordenadaY = Math.floor(Math.random() * y);
+                do {
+                    coordenadaX = Math.floor(Math.random() * x);
+                    coordenadaY = Math.floor(Math.random() * y);
+                } while (minada(casillas[coordenadaX][coordenadaY]));
+                casillas[coordenadaX][coordenadaY].mina = true;
+                //document.getElementById(`${coordenadaX}${coordenadaY}`).innerHTML = `<p>O</p>`;
+            }
+        }
+
+        function minada(casilla) {
+            return casilla.mina;
+        }
+
+        function tocado(){
+            console.log(event);
+        }
+
+        function abrirCasilla(coordenadaX, coordenadaY) {
+            if (casillas[coordenadaX][coordenadaY].mina) {
+                lose();
+            } else {
+                let mines = minasAlrededor(coordenadaX, coordenadaY);
+                const currentCasilla = document.getElementById(`${coordenadaX}${coordenadaY}`);
+                casillas[coordenadaX][coordenadaY].abierta = true;
+                if (mines > 0) {
+                    currentCasilla.style.backgroundColor = 'white';
+                    
+                    switch (mines) {
+                        case 1:
+                            currentCasilla.innerHTML += `<p class='azul'>${mines}</p>`;
+                            break;
+                        case 2:
+                            currentCasilla.innerHTML = `<p class='verde'>${mines}</p>`;
+                            break;
+                        case 3:
+                            currentCasilla.innerHTML = `<p class='rojo'>${mines}</p>`;
+                            break;
+                    }
+                } else {
+                    currentCasilla.style.backgroundColor = 'white';
+
+                    getAdyacentes(coordenadaX, coordenadaY).forEach(adyacente => {
+                        if (!adyacente.abierta) {
+                            abrirCasilla(adyacente.coordenadaX, adyacente.coordenadaY);
+                        }
+                    });
+
+                }
+                if (restantes() == 0) {
+                    win();
+                }
+            }
+        }
+
+        function minasAlrededor(coordenadaX, coordenadaY) {
+            let mines = 0;
+            let adyacentes = getAdyacentes(coordenadaX, coordenadaY)
+
+            adyacentes.forEach(casilla => {
+                if (casilla !== undefined && casilla.mina) {
+                    mines++;
+                }
+            });
+
+            return mines;
+        }
+
+        function getAdyacentes(coordenadaX, coordenadaY) {
+            let adyacentes = [];
+
+            if (coordenadaY > 0 && casillas[coordenadaX][coordenadaY - 1] != null) adyacentes.push(casillas[coordenadaX][coordenadaY - 1]);
+            if (coordenadaY < casillas[0].length - 1 && casillas[coordenadaX][coordenadaY + 1] != null) adyacentes.push(casillas[coordenadaX][coordenadaY + 1]);
+            if (coordenadaX < casillas.length - 1 && casillas[coordenadaX + 1][coordenadaY] != null) adyacentes.push(casillas[coordenadaX + 1][coordenadaY]);
+            if (coordenadaX > 0 && casillas[coordenadaX - 1][coordenadaY] != null) adyacentes.push(casillas[coordenadaX - 1][coordenadaY]);
+            if (coordenadaX > 0 && coordenadaY > 0 && casillas[coordenadaX - 1][coordenadaY - 1] != null) adyacentes.push(casillas[coordenadaX - 1][coordenadaY - 1]);
+            if (coordenadaX < casillas.length - 1 && coordenadaY > 0 && casillas[coordenadaX + 1][coordenadaY - 1] != null) adyacentes.push(casillas[coordenadaX + 1][coordenadaY - 1]);
+            if (coordenadaX > 0 && coordenadaY < casillas[0].length - 1 && casillas[coordenadaX - 1][coordenadaY + 1] != null) adyacentes.push(casillas[coordenadaX - 1][coordenadaY + 1]);
+            if (coordenadaX < casillas.length - 1 && coordenadaY < casillas[0].length - 1 && casillas[coordenadaX + 1][coordenadaY + 1] != null) adyacentes.push(casillas[coordenadaX + 1][coordenadaY + 1]); // Abajo-derecha
+
+            return adyacentes;
+        }
+
+        function restantes() {
+            let restantes = 0;
+            for (let i = 0; i < casillas.length; i++) {
+                for (let j = 0; j < casillas[i].length; j++) {
+                    if (!casillas[i][j].mina && !casillas[i][j].abierta) {
+                        restantes++;
+                    }
+                }
+            }
+
+            return restantes;
+        }
+
+        function lose() {
+            for (let i = 0; i < casillas.length; i++) {
+                for (let j = 0; j < casillas[i].length; j++) {
+                    if (casillas[i][j].mina) {
+                        document.getElementById(`${i}${j}`).style.backgroundColor = 'red';
+                    }
+                }
+            }
+
+        }
+
+        function win() {
+            alert("ganaste");
+        }
+
+        generarTablero(x, y);
+        añadirMinas(minas, casillas);
+    </script>
+</body>
+
+</html>

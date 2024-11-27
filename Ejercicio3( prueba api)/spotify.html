@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #father {
+            width: 100%;
+            margin: 60px auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        #father div {
+            position: relative;  /* Importante para que los elementos absolutos estén dentro de este div */
+            width: 29%;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #father img {
+            width: 100%;
+            height: auto;  /* Mantener la proporción de la imagen */
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        #father img:hover {
+            transform: scale(1.05);
+            filter: brightness(0.8);
+            cursor: pointer;
+        }
+
+        #father audio {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            
+            color: white;
+            text-align: center;
+            padding: 10px;
+            margin: 0;
+            z-index: 2;  
+            box-sizing: border-box; 
+        }
+
+       
+        #father div {
+            border: 2px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div id="father"></div>
+    <script>
+        const client_id = "8e883361";
+        const father = document.getElementById('father');
+        const cargarCancion = async () => {
+            try {
+                const respuesta = await fetch(`https://api.jamendo.com/v3.0/tracks?client_id=${client_id}&artist_name=TAB`);
+                const datos = await respuesta.json();
+                console.log(datos.results);
+                datos.results.forEach(song => {
+                    father.innerHTML += `
+                        <div>
+                            <img src="${song.album_image}" alt="${song.name}"/>
+                            <audio src="${song.audio}" controls>
+                                Tu navegador no soporta el elemento de audio
+                            </audio>
+                        </div>`;
+                });
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        cargarCancion();
+    </script>
+</body>
+</html>
